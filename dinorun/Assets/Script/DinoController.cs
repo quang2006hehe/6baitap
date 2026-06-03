@@ -352,10 +352,30 @@ public class DinoController : MonoBehaviour
         Vector2 checkPos = groundCheckPoint != null ? (Vector2)groundCheckPoint.position : new Vector2(transform.position.x, transform.position.y - (normalColliderSize.y / 2f));
         Gizmos.DrawWireCube(checkPos, groundCheckSize);
     }
+    private bool IsObstacle(GameObject go)
+    {
+        if (go == null) return false;
+
+        // 1. Kiểm tra bằng Tag (chuẩn nhất)
+        if (go.CompareTag("CactusSmall") || go.CompareTag("CactusLarge") || go.CompareTag("Bird") || go.CompareTag("Obstacle"))
+        {
+            return true;
+        }
+
+        // 2. Dự phòng bằng tên GameObject (đề phòng tag bị sai hoặc bị đưa về Untagged)
+        string name = go.name.ToLower();
+        if (name.Contains("cactus") || name.Contains("bird") || name.Contains("obs_"))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         // Khủng long chết khi đụng xương rồng hoặc chim
-        if (other.CompareTag("CactusSmall") || other.CompareTag("CactusLarge") || other.CompareTag("Bird"))
+        if (IsObstacle(other.gameObject))
         {
             if (GameManager.Instance != null && GameManager.Instance.currentGameState == GameState.Running)
             {
@@ -366,7 +386,7 @@ public class DinoController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("CactusSmall") || collision.gameObject.CompareTag("CactusLarge") || collision.gameObject.CompareTag("Bird"))
+        if (IsObstacle(collision.gameObject))
         {
             if (GameManager.Instance != null && GameManager.Instance.currentGameState == GameState.Running)
             {
